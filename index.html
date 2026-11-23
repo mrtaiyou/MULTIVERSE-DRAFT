@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multiverse Colors Draft — 6 Universes • 14 Colors • Live Voice & Chat</title>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #101524;
+    --panel-2: #161d31;
+    --border: #26314d;
+    --text: #f3f6ff;
+    --muted: #93a1c6;
+    --gold: #fbbf24;
+    --accent: #38bdf8;
+    --danger: #f43f5e;
+    --success: #10b981;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  body {
+    background: radial-gradient(circle at top, #131b33 0%, var(--bg) 65%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 14px;
+  }
+  .container { max-width: 1120px; margin: 0 auto; }
+  header {
+    text-align: center;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(56,189,248,0.12));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 14px;
+  }
+  header h1 {
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    letter-spacing: 1.5px;
+    background: linear-gradient(90deg, #fde047, #38bdf8, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+  }
+  header p { color: var(--muted); font-size: 0.88rem; margin-top: 4px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+  }
+  .section-title {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gold);
+    margin-bottom: 10px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .universe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .uni-btn {
+    background: var(--panel-2);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 10px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s ease;
+  }
+  .uni-btn:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .uni-btn.active {
+    border-color: var(--gold);
+    background: linear-gradient(145deg, rgba(251,191,36,0.2), rgba(56,189,248,0.12));
+    box-shadow: 0 0 15px rgba(251,191,36,0.25);
+  }
+  .uni-icon { font-size: 1.4rem; display: block; margin-bottom: 3px; }
+  .uni-name { font-weight: 800; font-size: 0.85rem; }
+  .uni-sub { font-size: 0.7rem; color: var(--muted); }
+
+  .mode-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .tab-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--muted);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #04101f;
+    border-color: var(--accent);
+  }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .field { flex: 1; min-width: 160px; }
+  label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; font-weight: 700; }
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #0b0f1c;
+    color: var(--text);
+    font-size: 0.92rem;
+    outline: none;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  .btn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: transform 0.12s ease, opacity 0.15s;
+  }
+  .btn:hover:not(:disabled) { transform: translateY(-1px); opacity: 0.95; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-primary { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #111827; }
+  .btn-accent { background: linear-gradient(135deg, #38bdf8, #0284c7); color: #fff; }
+  .btn-danger { background: linear-gradient(135deg, #f43f5e, #e11d48); color: #fff; }
+  .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+  .btn-ghost { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
+
+  .hidden { display: none !important; }
+
+  .room-banner {
+    background: linear-gradient(135deg, rgba(16,185,129,0.14), rgba(56,189,248,0.14));
+    border: 1px dashed var(--accent);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    margin-top: 10px;
+  }
+  .room-code-big {
+    font-size: 2.2rem;
+    font-weight: 900;
+    letter-spacing: 6px;
+    color: var(--gold);
+    margin: 6px 0;
+  }
+
+  .hud {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .player-box {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .player-box.active-turn { border-color: var(--gold); box-shadow: 0 0 12px rgba(251,191,36,0.25); }
+  .p-top { display: flex; justify-content: space-between; font-weight: 800; font-size: 0.92rem; }
+  .budget { color: var(--success); font-weight: 900; }
+  .slots { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .slot-pill {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: #0b0f1c;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .auction-stage {
+    text-align: center;
+    padding: 20px 14px;
+    background: radial-gradient(circle at center, rgba(56,189,248,0.12), transparent 70%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .color-orb {
+    width: 112px;
+    height: 112px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    box-shadow: 0 0 32px rgba(255,255,255,0.25);
+    border: 3px solid rgba(255,255,255,0.45);
+    animation: pulseOrb 2.2s infinite ease-in-out;
+  }
+  @keyframes pulseOrb {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  .bid-display {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--gold);
+    margin: 8px 0;
+  }
+  .bid-controls { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+  /* 3D Reveal Cards */
+  .reveal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .flip-card {
+    perspective: 1000px;
+    height: 185px;
+    cursor: pointer;
+  }
+  .flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-style: preserve-3d;
+  }
+  .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+  .flip-front, .flip-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border: 2px solid var(--border);
+  }
+  .flip-front {
+    background: linear-gradient(145deg, #172038, #0d1324);
+  }
+  .flip-back {
+    background: linear-gradient(145deg, #1d2847, #111827);
+    transform: rotateY(180deg);
+    border-color: var(--gold);
+  }
+  .tier-badge {
+    font-size: 0.68rem;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .tier-GOD { background: #fbbf24; color: #111; }
+  .tier-ELITE { background: #38bdf8; color: #04101f; }
+  .tier-SOLID { background: #10b981; color: #04101f; }
+  .tier-TRAP { background: #f43f5e; color: #fff; }
+
+  /* Toast Notification */
+  #toast-container {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 320px;
+    pointer-events: none;
+  }
+  .chat-toast {
+    pointer-events: auto;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid var(--gold);
+    border-left: 5px solid var(--accent);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 12px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.65);
+    animation: slideToast 0.28s ease-out;
+    font-size: 0.84rem;
+  }
+  .chat-toast strong { color: var(--gold); display: block; font-size: 0.78rem; margin-bottom: 2px; }
+  @keyframes slideToast {
+    from { opacity: 0; transform: translateX(30px) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+
+  /* Live Room Chat, Voice Mic & Sound Bar */
+  .comms-card { border-color: rgba(56,189,248,0.45); }
+  .comms-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .unread-badge {
+    background: var(--danger);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 999px;
+    display: none;
+  }
+  .unread-badge.show { display: inline-block; }
+
+  /* Voice Waveform & Mic Pill */
+  .voice-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #0b0f1c;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+  }
+  .voice-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .wave-bars {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    height: 16px;
+  }
+  .wave-bars span {
+    width: 3px;
+    height: 5px;
+    background: var(--muted);
+    border-radius: 3px;
+    transition: height 0.08s ease, background 0.15s ease;
+  }
+  .wave-bars.speaking span {
+    background: var(--success);
+  }
+  .mic-live {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: #fff !important;
+    box-shadow: 0 0 14px rgba(16,185,129,0.45);
+  }
+  .mic-muted {
+    background: linear-gradient(135deg, #f43f5e, #e11d48) !important;
+    color: #fff !important;
+  }
+
+  .banter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .banter-chip {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .banter-chip:hover { border-color: var(--gold); color: var(--gold); }
+  .chat-log {
+    height: 155px;
+    overflow-y: auto;
+    background: #090d18;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .chat-msg {
+    font-size: 0.83rem;
+    line-height: 1.35;
+    padding: 6px 10px;
+    border-radius: 9px;
+    background: var(--panel-2);
+    align-self: flex-start;
+    max-width: 88%;
+  }
+  .chat-msg.me {
+    align-self: flex-end;
+    background: rgba(56,189,248,0.18);
+    border: 1px solid rgba(56,189,248,0.35);
+  }
+  .chat-msg.sys {
+    align-self: center;
+    background: rgba(251,191,36,0.1);
+    color: var(--gold);
+    font-size: 0.75rem;
+  }
+  .chat-meta { font-size: 0.7rem; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
+
+  /* Codex Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.78);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    z-index: 9000;
+  }
+  .modal-box {
+    background: var(--panel);
+    border: 1px solid var(--gold);
+    border-radius: 16px;
+    max-width: 850px;
+    width: 100%;
+    max-height: 84vh;
+    overflow-y: auto;
+    padding: 18px;
+  }
+  .codex-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .codex-item {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+<audio id="remote-voice-audio" autoplay playsinline></audio>
+
+<div class="container">
+  <header>
+    <h1>MULTIVERSE COLORS DRAFT</h1>
+    <p>6 Universes • 14 Mystery Color Pools • 5-Digit Rooms • Live Voice Mic &amp; Ding Chat</p>
+  </header>
+
+  <!-- SETUP PANEL -->
+  <div id="setup-panel" class="card">
+    <div class="section-title">
+      <span>1. Choose Draft Universe</span>
+      <button class="btn btn-ghost" style="padding:5px 10px;font-size:0.78rem;" onclick="openCodex()">📖 View Color Codex</button>
+    </div>
+    <div class="universe-grid" id="universe-grid"></div>
+
+    <div class="section-title"><span>2. Game Mode &amp; Settings</span></div>
+    <div class="mode-tabs">
+      <button class="tab-btn active" data-mode="ai" onclick="selectMode('ai')">🤖 Solo vs AI</button>
+      <button class="tab-btn" data-mode="local" onclick="selectMode('local')">📱 Pass &amp; Play</button>
+      <button class="tab-btn" data-mode="host" onclick="selectMode('host')">🌐 Create 5-Digit Room</button>
+      <button class="tab-btn" data-mode="join" onclick="selectMode('join')">🔑 Join With Code</button>
+    </div>
+
+    <div class="row" style="margin-bottom:12px;">
+      <div class="field">
+        <label id="p1-label">Your Name</label>
+        <input type="text" id="p1-name" value="Player 1" maxlength="16">
+      </div>
+      <div class="field" id="p2-field">
+        <label id="p2-label">Opponent Name</label>
+        <input type="text" id="p2-name" value="Multiverse AI" maxlength="16">
+      </div>
+      <div class="field" id="join-code-field" style="display:none;">
+        <label>Enter 5-Digit Room Code</label>
+        <input type="text" id="join-code-input" placeholder="e.g. 48291" maxlength="5">
+      </div>
+      <div class="field" style="max-width:130px;">
+        <label>Budget ($)</label>
+        <select id="budget-select">
+          <option value="20" selected>$20</option>
+          <option value="25">$25</option>
+          <option value="30">$30</option>
+        </select>
+      </div>
+      <div class="field" style="max-width:130px;">
+        <label>Roster Slots</label>
+        <select id="slots-select">
+          <option value="4" selected>4 Picks</option>
+          <option value="5">5 Picks</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn btn-primary" id="start-btn" onclick="handleStartAction()">🚀 Start Draft</button>
+      <span id="status-text" style="font-size:0.82rem;color:var(--muted);">Ready to draft!</span>
+    </div>
+
+    <div id="host-lobby" class="room-banner hidden">
+      <div style="font-size:0.82rem;color:var(--muted);font-weight:700;">SHARE THIS 5-DIGIT ROOM CODE WITH YOUR FRIEND</div>
+      <div class="room-code-big" id="display-room-code">00000</div>
+      <div class="row" style="justify-content:center;">
+        <button class="btn btn-accent" onclick="copyRoomCode()">📋 Copy Code</button>
+        <span id="lobby-wait-msg" style="font-size:0.84rem;color:var(--gold);font-weight:700;">Waiting for friend to join...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE AUCTION PANEL -->
+  <div id="auction-panel" class="card hidden">
+    <div class="section-title">
+      <span id="auction-round-title">ROUND 1 — BLIND COLOR AUCTION</span>
+      <button class="btn btn-ghost" style="padding:5px 10px;font-size:0.76rem;" onclick="resetToMenu()">↩ Menu</button>
+    </div>
+
+    <div class="hud">
+      <div class="player-box" id="p1-hud">
+        <div class="p-top"><span id="hud-p1-name">Player 1</span><span class="budget" id="hud-p1-budget">$20</span></div>
+        <div class="slots" id="hud-p1-slots"></div>
+      </div>
+      <div style="text-align:center;font-weight:900;color:var(--gold);font-size:1.1rem;">VS</div>
+      <div class="player-box" id="p2-hud">
+        <div class="p-top"><span id="hud-p2-name">Player 2</span><span class="budget" id="hud-p2-budget">$20</span></div>
+        <div class="slots" id="hud-p2-slots"></div>
+      </div>
+    </div>
+
+    <div class="auction-stage">
+      <div class="color-orb" id="orb-display">🔴</div>
+      <h2 id="color-title" style="font-size:1.45rem;font-weight:900;letter-spacing:1px;">RED POOL</h2>
+      <p id="color-hint" style="color:var(--muted);font-size:0.84rem;margin-top:3px;">Mystery character hidden inside — highest bidder wins the color!</p>
+      <div class="bid-display" id="current-bid-text">Current Bid: $1 (Player 1)</div>
+      <div id="turn-indicator" style="font-size:0.88rem;font-weight:800;color:var(--accent);">Your turn to Raise or Pass</div>
+
+      <div class="bid-controls" id="bid-buttons">
+        <button class="btn btn-primary" onclick="placeBid(1)">Raise +$1</button>
+        <button class="btn btn-accent" onclick="placeBid(2)">Raise +$2</button>
+        <button class="btn btn-ghost" onclick="placeBid(3)">Raise +$3</button>
+        <button class="btn btn-danger" onclick="passBid()">Pass</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINAL REVEAL PANEL -->
+  <div id="reveal-panel" class="card hidden">
+    <div class="section-title">
+      <span>🎉 FINAL ROSTER REVEAL — CLICK CARDS TO FLIP!</span>
+      <div class="row">
+        <button class="btn btn-accent" style="padding:6px 12px;font-size:0.8rem;" onclick="flipAllCards()">⚡ Flip All</button>
+        <button class="btn btn-primary" style="padding:6px 12px;font-size:0.8rem;" onclick="rematchDraft()">🔄 Rematch</button>
+      </div>
+    </div>
+
+    <div id="winner-banner" class="room-banner hidden" style="margin-bottom:14px;"></div>
+
+    <h3 id="rev-p1-title" style="color:var(--accent);margin-top:8px;">Player 1 Squad</h3>
+    <div class="reveal-grid" id="rev-p1-grid"></div>
+
+    <h3 id="rev-p2-title" style="color:var(--gold);margin-top:18px;">Player 2 Squad</h3>
+    <div class="reveal-grid" id="rev-p2-grid"></div>
+  </div>
+
+  <!-- LIVE ROOM VOICE MIC, CHAT & SOUND ALERTS -->
+  <div class="card comms-card" id="room-comms">
+    <div class="comms-header">
+      <div class="row">
+        <span style="font-weight:900;color:var(--accent);font-size:0.95rem;">🎙️ LIVE ROOM VOICE &amp; CHAT</span>
+        <span id="room-badge" style="font-size:0.75rem;color:var(--muted);background:var(--panel-2);padding:3px 9px;border-radius:999px;border:1px solid var(--border);">Local Room</span>
+        <span id="unread-badge" class="unread-badge">0 NEW</span>
+      </div>
+      <div class="row">
+        <button class="btn btn-ghost" id="sound-toggle-btn" style="padding:5px 10px;font-size:0.76rem;" onclick="toggleSound()">🔔 Ding Sound: ON</button>
+        <button class="btn btn-ghost" style="padding:5px 10px;font-size:0.76rem;" onclick="playDingSound(true)">🔊 Test Ding</button>
+      </div>
+    </div>
+
+    <!-- VOICE MIC CONTROLS -->
+    <div class="voice-bar">
+      <div class="voice-status">
+        <div class="wave-bars" id="mic-wave">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <span id="mic-status-text">Voice Mic: Off (Click Enable Mic to talk in room)</span>
+      </div>
+      <div class="row">
+        <button class="btn btn-accent" id="mic-enable-btn" style="padding:6px 12px;font-size:0.8rem;" onclick="toggleMicAccess()">🎤 Enable Mic</button>
+        <button class="btn btn-ghost hidden" id="mic-mute-btn" style="padding:6px 12px;font-size:0.8rem;" onclick="toggleMicMute()">🔊 Mute</button>
+      </div>
+    </div>
+
+    <div class="banter-row">
+      <button class="banter-chip" onclick="sendQuickBanter('🔥 Nice steal!')">🔥 Nice steal!</button>
+      <button class="banter-chip" onclick="sendQuickBanter('🪤 Enjoy that trap!')">🪤 Enjoy that trap!</button>
+      <button class="banter-chip" onclick="sendQuickBanter('💸 Bidding war!')">💸 Bidding war!</button>
+      <button class="banter-chip" onclick="sendQuickBanter('😱 No way!')">😱 No way!</button>
+      <button class="banter-chip" onclick="sendQuickBanter('🤝 GG!')">🤝 GG!</button>
+    </div>
+
+    <div class="chat-log" id="chat-log"></div>
+
+    <div class="row">
+      <input type="text" id="chat-input" placeholder="Type a message to your friend or AI..." maxlength="140" onkeydown="if(event.key==='Enter') sendChatMessage()">
+      <button class="btn btn-accent" onclick="sendChatMessage()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- COLOR CODEX MODAL -->
+<div id="codex-modal" class="modal-backdrop hidden" onclick="if(event.target===this) closeCodex()">
+  <div class="modal-box">
+    <div class="section-title">
+      <span id="codex-title">14 MYSTERY COLOR POOLS</span>
+      <button class="btn btn-danger" style="padding:5px 12px;font-size:0.8rem;" onclick="closeCodex()">✕ Close</button>
+    </div>
+    <p style="font-size:0.82rem;color:var(--muted);">Each color hides 10 characters ranging from Cosmic Gods (100 pts) to hilarious Traps (10–25 pts).</p>
+    <div class="codex-grid" id="codex-grid"></div>
+  </div>
+</div>
+
+<script>
+// ==================== 1. SOUND ENGINE (CRISP DING NOTIFICATION) ====================
+let soundEnabled = true;
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (Ctx) audioCtx = new Ctx();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
+  }
+  return audioCtx;
+}
+
+function playDingSound(force = false) {
+  if (!soundEnabled && !force) return;
+  try {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc1.type = 'sine';
+    osc2.type = 'triangle';
+
+    osc1.frequency.setValueAtTime(987.77, now);         // B5
+    osc1.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+
+    osc2.frequency.setValueAtTime(1975.53, now);        // B6 shimmer
+    osc2.frequency.setValueAtTime(2637.02, now + 0.08); // E7 shimmer
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(0.24, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.14, now + 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.65);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + 0.66);
+    osc2.stop(now + 0.66);
+  } catch (e) {}
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  const btn = document.getElementById('sound-toggle-btn');
+  btn.textContent = soundEnabled ? '🔔 Ding Sound: ON' : '🔕 Ding Sound: OFF';
+  if (soundEnabled) playDingSound(true);
+}
+
+document.addEventListener('pointerdown', () => getAudioCtx(), { once: true });
+
+// ==================== 2. LIVE WEBRTC MICROPHONE ENGINE ====================
+let localAudioStream = null;
+let activeMediaCall = null;
+let isMicMuted = false;
+let micAnalyser = null;
+let micAnimFrame = null;
+
+async function toggleMicAccess() {
+  getAudioCtx();
+  const enableBtn = document.getElementById('mic-enable-btn');
+  const muteBtn = document.getElementById('mic-mute-btn');
+  const statusText = document.getElementById('mic-status-text');
+
+  // If already enabled, turn mic off cleanly
+  if (localAudioStream) {
+    stopMicStream();
+    enableBtn.textContent = '🎤 Enable Mic';
+    enableBtn.classList.remove('mic-live');
+    muteBtn.classList.add('hidden');
+    statusText.textContent = 'Voice Mic: Off';
+    return;
+  }
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    statusText.textContent = '⚠️ Mic unavailable in this browser/iframe. Open page directly on Netlify or pop-out tab.';
+    return;
+  }
+
+  try {
+    localAudioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    isMicMuted = false;
+    enableBtn.textContent = '⏹ Stop Mic';
+    enableBtn.classList.add('mic-live');
+    muteBtn.classList.remove('hidden');
+    muteBtn.textContent = '🔊 Mute';
+    muteBtn.classList.remove('mic-muted');
+    statusText.textContent = conn && conn.open
+      ? '🎙️ Mic Live — Streaming voice to room!'
+      : '🎙️ Mic Active (Join/Host a 5-digit room to stream voice)';
+
+    startMicMeter(localAudioStream);
+    connectVoiceCallIfReady();
+    playDingSound();
+  } catch (err) {
+    statusText.textContent = '⚠️ Mic blocked by browser or iframe sandbox. Allow mic permission in address bar (or open Netlify URL directly).';
+    showToastNotification('Mic Permission Needed', 'Allow microphone access in your browser to talk in the room.');
+  }
+}
+
+function toggleMicMute() {
+  if (!localAudioStream) return;
+  isMicMuted = !isMicMuted;
+  localAudioStream.getAudioTracks().forEach(track => {
+    track.enabled = !isMicMuted;
+  });
+  const muteBtn = document.getElementById('mic-mute-btn');
+  const statusText = document.getElementById('mic-status-text');
+  if (isMicMuted) {
+    muteBtn.textContent = '🔇 Unmute';
+    muteBtn.classList.add('mic-muted');
+    statusText.textContent = '🔇 Mic Muted';
+  } else {
+    muteBtn.textContent = '🔊 Mute';
+    muteBtn.classList.remove('mic-muted');
+    statusText.textContent = '🎙️ Mic Live — Streaming voice!';
+  }
+}
+
+function stopMicStream() {
+  if (micAnimFrame) cancelAnimationFrame(micAnimFrame);
+  if (localAudioStream) {
+    localAudioStream.getTracks().forEach(t => t.stop());
+    localAudioStream = null;
+  }
+  if (activeMediaCall) {
+    try { activeMediaCall.close(); } catch (e) {}
+    activeMediaCall = null;
+  }
+  const wave = document.getElementById('mic-wave');
+  wave.classList.remove('speaking');
+  wave.querySelectorAll('span').forEach(s => s.style.height = '5px');
+}
+
+function startMicMeter(stream) {
+  try {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    const src = ctx.createMediaStreamSource(stream);
+    micAnalyser = ctx.createAnalyser();
+    micAnalyser.fftSize = 64;
+    src.connect(micAnalyser);
+    const data = new Uint8Array(micAnalyser.frequencyBinCount);
+    const wave = document.getElementById('mic-wave');
+    const bars = wave.querySelectorAll('span');
+
+    function tick() {
+      if (!localAudioStream) return;
+      micAnalyser.getByteFrequencyData(data);
+      let sum = 0;
+      for (let i = 0; i < 12; i++) sum += data[i];
+      const avg = sum / 12;
+      const active = !isMicMuted && avg > 14;
+      wave.classList.toggle('speaking', active);
+      bars.forEach((bar, idx) => {
+        const val = active ? Math.min(16, Math.max(5, (data[idx + 1] || avg) / 12)) : 5;
+        bar.style.height = val + 'px';
+      });
+      micAnimFrame = requestAnimationFrame(tick);
+    }
+    tick();
+  } catch (e) {}
+}
+
+function connectVoiceCallIfReady() {
+  if (!peer || !conn || !conn.open || !localAudioStream) return;
+  try {
+    const call = peer.call(conn.peer, localAudioStream);
+    attachMediaCallHandlers(call);
+  } catch (e) {}
+}
+
+function attachMediaCallHandlers(call) {
+  activeMediaCall = call;
+  call.on('stream', (remoteStream) => {
+    const audioEl = document.getElementById('remote-voice-audio');
+    audioEl.srcObject = remoteStream;
+    audioEl.play().catch(() => {});
+    document.getElementById('mic-status-text').textContent = '🎧 Two-Way Voice Connected!';
+  });
+}
+
+// ==================== 3. 14 COLORS & 6 UNIVERSES DATA ====================
+const COLORS = [
+  { id: 'RED', name: 'Red', emoji: '🔴', bg: 'linear-gradient(135deg,#ef4444,#991b1b)' },
+  { id: 'BLUE', name: 'Blue', emoji: '🔵', bg: 'linear-gradient(135deg,#3b82f6,#1e3a8a)' },
+  { id: 'GREEN', name: 'Green', emoji: '🟢', bg: 'linear-gradient(135deg,#22c55e,#14532d)' },
+  { id: 'GOLD', name: 'Gold', emoji: '🟡', bg: 'linear-gradient(135deg,#facc15,#a16207)' },
+  { id: 'PURPLE', name: 'Purple', emoji: '🟣', bg: 'linear-gradient(135deg,#a855f7,#581c87)' },
+  { id: 'BLACK', name: 'Black', emoji: '⚫', bg: 'linear-gradient(135deg,#475569,#090d16)' },
+  { id: 'WHITE', name: 'White', emoji: '⚪', bg: 'linear-gradient(135deg,#f8fafc,#94a3b8)' },
+  { id: 'SILVER', name: 'Silver', emoji: '🔘', bg: 'linear-gradient(135deg,#cbd5e1,#475569)' },
+  { id: 'ORANGE', name: 'Orange', emoji: '🟠', bg: 'linear-gradient(135deg,#f97316,#9a3412)' },
+  { id: 'PINK', name: 'Pink', emoji: '🌸', bg: 'linear-gradient(135deg,#f472b6,#9d174d)' },
+  { id: 'CRIMSON', name: 'Crimson', emoji: '🩸', bg: 'linear-gradient(135deg,#e11d48,#881337)' },
+  { id: 'CYAN', name: 'Cyan', emoji: '💎', bg: 'linear-gradient(135deg,#06b6d4,#155e75)' },
+  { id: 'BRONZE', name: 'Bronze', emoji: '🟤', bg: 'linear-gradient(135deg,#d97706,#78350f)' },
+  { id: 'COSMIC', name: 'Cosmic', emoji: '🌈', bg: 'linear-gradient(135deg,#ec4899,#8b5cf6,#06b6d4)' }
+];
+
+const UNIVERSES = {
+  marvel: {
+    name: 'Marvel', icon: '🦸', sub: '140 Heroes & Villains',
+    pools: {
+      RED: [['Scarlet Witch','GOD',98],['Deadpool','ELITE',84],['Iron Man','ELITE',88],['Spider-Man','ELITE',86],['Daredevil','SOLID',68],['Red Skull','SOLID',65],['Carnage','ELITE',85],['Ant-Man','SOLID',72],['Elektra','SOLID',64],['Paste-Pot Pete','TRAP',15]],
+      BLUE: [['Thor','GOD',96],['Doctor Strange','GOD',94],['Mystique','SOLID',70],['Beast','SOLID',71],['Nightcrawler','SOLID',74],['Quicksilver','ELITE',81],['Yondu','SOLID',73],['Captain America','ELITE',83],['Ice Man','ELITE',87],['Blue Marvel','GOD',95]],
+      GREEN: [['World War Hulk','GOD',97],['Doctor Doom','GOD',95],['Loki','ELITE',85],['Green Goblin','ELITE',80],['Drax','SOLID',72],['Gamora','SOLID',75],['She-Hulk','ELITE',82],['Mysterio','SOLID',69],['Scorpion','SOLID',63],['Toad','TRAP',18]],
+      GOLD: [['Sentry','GOD',99],['Adam Warlock','GOD',95],['Hyperion','GOD',93],['Nova Prime','ELITE',88],['Odin','GOD',96],['Luke Cage','SOLID',73],['Iron Fist','SOLID',74],['Wolverine','ELITE',86],['Heimdall','SOLID',76],['Shocker','TRAP',20]],
+      PURPLE: [['Thanos','GOD',98],['Galactus','GOD',100],['Magneto','GOD',92],['Kang','ELITE',89],['Hawkeye','SOLID',70],['Psylocke','SOLID',76],['Agatha Harkness','ELITE',83],['Baron Zemo','TRAP',24],['Prowler','SOLID',67],['Purple Man','SOLID',68]],
+      BLACK: [['Knull','GOD',99],['Venom','ELITE',85],['Black Panther','ELITE',84],['Ghost Rider','GOD',93],['Black Bolt','GOD',92],['Blade','SOLID',76],['Punisher','SOLID',71],['Hela','GOD',94],['Nick Fury','SOLID',66],['Black Cat','SOLID',65]],
+      WHITE: [['Moon Knight','ELITE',82],['Emma Frost','ELITE',81],['White Vision','ELITE',85],['Storm','GOD',91],['Anti-Venom','ELITE',84],['Taskmaster','SOLID',73],['White Tiger','SOLID',67],['Mister Negative','SOLID',74],['Domino','SOLID',75],['Snowbird','SOLID',70]],
+      SILVER: [['Silver Surfer','GOD',97],['Ultron','GOD',92],['Colossus','SOLID',78],['Silver Sable','SOLID',66],['Quick-Silver','ELITE',81],['War Machine','ELITE',82],['Winter Soldier','SOLID',77],['Silver Samurai','SOLID',72],['X-23','ELITE',80],['Stilt-Man','TRAP',14]],
+      ORANGE: [['The Thing','ELITE',83],['Human Torch','ELITE',85],['Hobgoblin','SOLID',72],['Sabretooth','SOLID',76],['Beta Ray Bill','GOD',93],['Magik','ELITE',86],['Sunspot','ELITE',82],['Pyro','SOLID',66],['Tigra','SOLID',68],['Howard the Duck','TRAP',16]],
+      PINK: [['Gwenpool','ELITE',81],['Psylocke','SOLID',77],['Blink','SOLID',75],['Jubilee','SOLID',64],['Songbird','SOLID',71],['Pixie','SOLID',66],['America Chavez','ELITE',84],['Viv Vision','SOLID',73],['Starfox','SOLID',69],['Squirrel Girl','TRAP',25]],
+      CRIMSON: [['Juggernaut','ELITE',89],['Red Hulk','ELITE',88],['Mephisto','GOD',96],['Omega Red','SOLID',79],['Crimson Dynamo','SOLID',70],['Klaw','SOLID',67],['Bloodstone','SOLID',72],['Morbius','SOLID',68],['Azazel','SOLID',74],['Big Wheel','TRAP',12]],
+      CYAN: [['Invisible Woman','ELITE',86],['Mister Fantastic','ELITE',85],['Cyclops','ELITE',81],['Crystal','SOLID',75],['Namor','ELITE',84],['Phyla-Vell','ELITE',83],['Wave','SOLID',71],['Hydro-Man','SOLID',66],['Electro','SOLID',76],['Boilermaker','TRAP',19]],
+      BRONZE: [['Hercules','ELITE',88],['Ares','ELITE',85],['Groot','SOLID',76],['Rocket Raccoon','SOLID',75],['Kraven','SOLID',74],['Bishop','SOLID',79],['Cable','ELITE',84],['Sandman','SOLID',75],['Vulture','SOLID',64],['Batroc the Leaper','TRAP',17]],
+      COSMIC: [['One Above All','GOD',100],['Living Tribunal','GOD',99],['Beyonder','GOD',99],['Phoenix Force','GOD',98],['Eternity','GOD',98],['Infinity','GOD',97],['Franklin Richards','GOD',98],['Molecule Man','GOD',97],['Watcher','ELITE',88],['Cosmo the Spacedog','SOLID',72]]
+    }
+  },
+  dc: {
+    name: 'DC Comics', icon: '🦇', sub: '140 Legends & Rogues',
+    pools: {
+      RED: [['The Flash','GOD',96],['Atrocitus','ELITE',88],['Red Hood','SOLID',76],['Shazam','GOD',93],['Plastic Man','ELITE',84],['Red Tornado','SOLID',77],['Starfire','ELITE',83],['Deadshot','SOLID',71],['Bleez','SOLID',75],['Kite Man','TRAP',14]],
+      BLUE: [['Superman','GOD',99],['Doctor Manhattan','GOD',100],['Nightwing','SOLID',77],['Blue Beetle','ELITE',82],['Saint Walker','ELITE',85],['Captain Cold','SOLID',69],['Static Shock','SOLID',76],['Atom','SOLID',74],['Mister Freeze','SOLID',72],['Polka-Dot Man','TRAP',16]],
+      GREEN: [['Green Lantern Hal','GOD',92],['Martian Manhunter','GOD',95],['Swamp Thing','GOD',96],['Beast Boy','SOLID',75],['Poison Ivy','ELITE',81],['Riddler','SOLID',66],['Brainiac','GOD',94],['John Stewart','ELITE',89],['Kilowog','ELITE',83],['Condiment King','TRAP',12]],
+      GOLD: [['Reverse-Flash','GOD',96],['Doctor Fate','GOD',96],['Booster Gold','SOLID',73],['Wonder Woman','GOD',95],['Aquaman','ELITE',85],['Sinestro','GOD',91],['Black Adam','GOD',95],['Golden Glider','SOLID',64],['Hawkman','SOLID',76],['Crazy Quilt','TRAP',15]],
+      PURPLE: [['Joker','ELITE',82],['Star Sapphire','ELITE',84],['Raven','GOD',93],['Lex Luthor','ELITE',86],['Huntress','SOLID',70],['Parasite','SOLID',78],['Bizarro','ELITE',85],['Catwoman','SOLID',71],['Indigo-1','SOLID',79],['Calendar Man','TRAP',18]],
+      BLACK: [['Darkseid','GOD',99],['Batman','ELITE',88],['Black Hand','GOD',92],['Zatanna','ELITE',87],['Lobo','GOD',91],['Black Canary','SOLID',74],['Deathstroke','ELITE',83],['Black Manta','SOLID',76],['Solomon Grundy','SOLID',78],['Ten-Eyed Man','TRAP',13]],
+      WHITE: [['White Lantern Kyle','GOD',98],['Power Girl','ELITE',88],['Captain Atom','GOD',93],['Mister Terrific','SOLID',78],['White Martian','ELITE',85],['Deadman','SOLID',75],['Phantom Stranger','GOD',96],['Dove','SOLID',68],['Silver Banshee','SOLID',73],['Egghead','TRAP',15]],
+      SILVER: [['Cyborg','ELITE',84],['Silver Surfer Clone','SOLID',70],['Steel','SOLID',77],['Metallo','SOLID',76],['Mercury','SOLID',74],['Mirror Master','SOLID',73],['Supergirl','GOD',94],['Orion','GOD',92],['General Zod','GOD',95],['Clock King','TRAP',17]],
+      ORANGE: [['Larfleeze','GOD',94],['Deathstroke','ELITE',84],['Starfire','ELITE',83],['Aquaman','ELITE',85],['Firestorm','ELITE',88],['Copperhead','SOLID',65],['Clayface','SOLID',76],['Bane','ELITE',81],['Heatwave','SOLID',68],['Penny Plunderer','TRAP',14]],
+      PINK: [['Star Sapphire Carol','ELITE',85],['Harley Quinn','SOLID',74],['Miss Martian','ELITE',83],['Saturn Girl','SOLID',76],['Dreamer','SOLID',73],['Jinx','SOLID',72],['Cheshire','SOLID',71],['Giganta','SOLID',75],['Princess Amethyst','ELITE',81],['Bouncing Boy','TRAP',19]],
+      CRIMSON: [['Trigon','GOD',98],['Red Lantern Guy','ELITE',86],['Doomsday','GOD',97],['Etrigan','ELITE',87],['Bloodsport','SOLID',74],['Man-Bat','SOLID',70],['Azrael','SOLID',77],['Cheetah','SOLID',78],['Red X','SOLID',76],['Zebra-Man','TRAP',15]],
+      CYAN: [['Ice','SOLID',72],['Killer Frost','SOLID',76],['Vibe','SOLID',75],['Tempest','SOLID',78],['Mera','ELITE',84],['Lagoon Boy','SOLID',66],['Rip Hunter','SOLID',73],['Blue Devil','SOLID',74],['Aqualad','SOLID',75],['Angle Man','TRAP',16]],
+      BRONZE: [['Bronze Tiger','SOLID',76],['Wildcat','SOLID',71],['Jonah Hex','SOLID',68],['Gorilla Grodd','ELITE',82],['Kilowog','ELITE',83],['Eclipso','GOD',92],['Mongul','GOD',91],['Steppenwolf','ELITE',86],['Krypto','SOLID',79],['Matter-Eater Lad','TRAP',20]],
+      COSMIC: [['The Presence','GOD',100],['Lucifer Morningstar','GOD',100],['Michael Demiurgos','GOD',99],['Anti-Monitor','GOD',99],['Spectre','GOD',98],['Perpetua','GOD',99],['Superboy-Prime','GOD',98],['World Forger','GOD',97],['Monitor','GOD',95],['Bat-Mite','SOLID',80]]
+    }
+  },
+  pokemon: {
+    name: 'Pokémon', icon: '⚡', sub: '140 Legendaries & Traps',
+    pools: {
+      RED: [['Groudon','GOD',96],['Charizard','ELITE',86],['Yveltal','GOD',95],['Blaziken','ELITE',83],['Gyarados Shiny','ELITE',84],['Scizor','SOLID',79],['Volcarona','ELITE',82],['Arcanine','SOLID',78],['Bisharp','SOLID',76],['Magikarp','TRAP',10]],
+      BLUE: [['Kyogre','GOD',96],['Greninja','ELITE',85],['Blastoise','ELITE',82],['Suicune','ELITE',87],['Articuno','ELITE',85],['Lucario','ELITE',84],['Metagross','ELITE',88],['Lapras','SOLID',76],['Vaporeon','SOLID',75],['Wobbuffet','TRAP',20]],
+      GREEN: [['Rayquaza','GOD',98],['Zygarde 100%','GOD',97],['Sceptile','ELITE',82],['Venusaur','ELITE',82],['Tyranitar','ELITE',88],['Celebi','ELITE',87],['Torterra','SOLID',78],['Flygon','SOLID',77],['Scyther','SOLID',74],['Metapod','TRAP',12]],
+      GOLD: [['Arceus','GOD',100],['Pikachu Ash','ELITE',85],['Zapdos','ELITE',86],['Jirachi','ELITE',88],['Solgaleo','GOD',95],['Alakazam','ELITE',82],['Electivire','SOLID',79],['Jolteon','SOLID',76],['Ampharos','SOLID',75],['Dunsparce','TRAP',16]],
+      PURPLE: [['Mewtwo','GOD',98],['Gengar','ELITE',85],['Eternatus','GOD',97],['Naganadel','ELITE',84],['Espeon','SOLID',77],['Crobat','SOLID',76],['Nidoking','SOLID',78],['Chandelure','SOLID',79],['Spiritomb','SOLID',75],['Zubat Swarm','TRAP',14]],
+      BLACK: [['Zekrom','GOD',95],['Darkrai','GOD',92],['Umbreon','SOLID',79],['Giratina','GOD',98],['Necrozma','GOD',97],['Hydreigon','ELITE',86],['Houndoom','SOLID',75],['Absol','SOLID',76],['Luxray','SOLID',77],['Unown','TRAP',13]],
+      WHITE: [['Reshiram','GOD',95],['Lugia','GOD',96],['Dialga','GOD',97],['Gardevoir','ELITE',83],['Togekiss','ELITE',81],['Absol Mega','ELITE',84],['Zangoose','SOLID',73],['Silvally','ELITE',82],['Altaria','SOLID',75],['Snom','TRAP',18]],
+      SILVER: [['Steelix','SOLID',79],['Aggron','SOLID',80],['Skarmory','SOLID',77],['Registeel','ELITE',84],['Melmetal','ELITE',88],['Cobalion','ELITE',83],['Corviknight','ELITE',81],['Klinklang','SOLID',70],['Aegislash','ELITE',86],['Meltan','TRAP',19]],
+      ORANGE: [['Dragonite','ELITE',89],['Ho-Oh','GOD',96],['Infernape','ELITE',83],['Cinderace','ELITE',82],['Entei','ELITE',86],['Raichu','SOLID',76],['Magmortar','SOLID',78],['Flareon','SOLID',74],['Rotom Heat','SOLID',77],['Torchic','TRAP',22]],
+      PINK: [['Mew','GOD',93],['Sylveon','SOLID',79],['Diancie','ELITE',86],['Clefable','SOLID',77],['Blissey','SOLID',78],['Tapu Lele','ELITE',87],['Slowbro','SOLID',76],['Milotic','ELITE',81],['Jigglypuff','SOLID',65],['Luvdisc','TRAP',11]],
+      CRIMSON: [['Yveltal','GOD',95],['Deoxys Attack','GOD',94],['Koraidon','GOD',96],['Zamazenta','GOD',93],['Scolipede','SOLID',75],['Krookodile','SOLID',79],['Talonflame','SOLID',77],['Crawdaunt','SOLID',74],['Zoroark','ELITE',82],['Feebas','TRAP',12]],
+      CYAN: [['Miraidon','GOD',96],['Zacian','GOD',97],['Keldeo','ELITE',85],['Manaphy','ELITE',83],['Glaceon','SOLID',75],['Milotic','ELITE',81],['Kingdra','SOLID',79],['Regice','ELITE',83],['Latios','ELITE',88],['Shuckle','TRAP',21]],
+      BRONZE: [['Regirock','ELITE',83],['Ursaluna','ELITE',86],['Garchomp','ELITE',90],['Excadrill','ELITE',82],['Hippowdon','SOLID',77],['Mamoswine','ELITE',81],['Rhyperior','SOLID',80],['Kabutops','SOLID',75],['Hitmonlee','SOLID',74],['Bidoof','TRAP',15]],
+      COSMIC: [['Mega Rayquaza','GOD',100],['Ultra Necrozma','GOD',99],['Origin Giratina','GOD',98],['Palkia Origin','GOD',98],['Dialga Origin','GOD',98],['Hoopa Unbound','GOD',95],['Deoxys','GOD',94],['Cosmog','TRAP',15],['Clefairy','SOLID',68],['Minior','SOLID',72]]
+    }
+  },
+  anime: {
+    name: 'Anime', icon: '⚔️', sub: '140 Shonen Icons',
+    pools: {
+      RED: [['Gear 5 Luffy','GOD',97],['Itachi Uchiha','ELITE',90],['Tanjiro','SOLID',79],['Shanks','GOD',95],['Natsu Dragneel','ELITE',84],['Alucard','GOD',94],['Kurama','GOD',93],['Edward Elric','SOLID',78],['Inuyasha','SOLID',77],['Yamcha','TRAP',14]],
+      BLUE: [['Gojo Satoru','GOD',98],['Vegeta SSB','GOD',97],['Rimuru Tempest','GOD',99],['Levi Ackerman','ELITE',84],['Sasuke Rinnegan','GOD',95],['Aokiji','ELITE',88],['Grimmjow','ELITE',83],['Gray Fullbuster','SOLID',76],['Giyu Tomioka','SOLID',79],['Aqua (Konosuba)','TRAP',15]],
+      GREEN: [['Broly','GOD',97],['Roronoa Zoro','ELITE',89],['Gon Freecss','ELITE',83],['Deku','ELITE',85],['Piccolo','ELITE',86],['Tatsumaki','GOD',93],['Rock Lee','SOLID',77],['Might Guy','ELITE',88],['C.C.','SOLID',68],['Mumen Rider','TRAP',18]],
+      GOLD: [['Super Saiyan Goku','GOD',98],['Saitama','GOD',100],['Gilgamesh','GOD',96],['Naruto Baryon','GOD',97],['Dio Brando','ELITE',89],['Minato','ELITE',88],['Escanor','GOD',94],['All Might','ELITE',89],['Zenitsu','SOLID',78],['King (OPM)','TRAP',16]],
+      PURPLE: [['Madara Uchiha','GOD',96],['Beerus','GOD',99],['Frieza Black','GOD',98],['Aizen','GOD',97],['Meruem','ELITE',90],['Yoruichi','ELITE',83],['Shinobu','SOLID',75],['Killua','ELITE',84],['Pain','ELITE',89],['Mineta','TRAP',12]],
+      BLACK: [['Ichigo Mugetsu','GOD',97],['Sung Jin-Woo','GOD',98],['Guts','ELITE',86],['Sukuna','GOD',96],['Blackbeard','GOD',93],['Jotaro Kujo','ELITE',88],['Kakashi','ELITE',85],['Zeref','GOD',92],['Roy Mustang','SOLID',79],['Mr. Satan','TRAP',13]],
+      WHITE: [['Ultra Instinct Goku','GOD',100],['Whitebeard','GOD',95],['Kaneki Ken','ELITE',83],['Killua Godspeed','ELITE',85],['Toshiro Hitsugaya','ELITE',84],['Byakuya','ELITE',85],['Accelerator','GOD',96],['Gintoki','SOLID',78],['Inumaki','SOLID',74],['Spandam','TRAP',11]],
+      SILVER: [['Trunks','ELITE',86],['Silver Fang','ELITE',84],['Polnareff','SOLID',76],['Gajeel','SOLID',77],['Gin Ichimaru','ELITE',84],['Garou','GOD',95],['Genos','ELITE',81],['Kite','SOLID',78],['Tengen Uzui','SOLID',80],['Buggy the Clown','TRAP',17]],
+      ORANGE: [['Naruto Sage','ELITE',89],['Ichigo Bankai','ELITE',90],['Jiraiya','ELITE',86],['Rengoku','ELITE',84],['Ace','ELITE',83],['Kenshin','SOLID',79],['Nami','SOLID',68],['Bakugo','ELITE',83],['Shoyo Hinata','SOLID',65],['Kon','TRAP',12]],
+      PINK: [['Majin Buu','GOD',94],['Sakura Haruno','SOLID',78],['Mitsuri Kanroji','SOLID',79],['Natsu','ELITE',84],['Yuno Gasai','SOLID',70],['Anya Forger','SOLID',66],['Big Mom','GOD',93],['Astolfo','SOLID',72],['Saiki K','GOD',98],['Oolong','TRAP',14]],
+      CRIMSON: [['Hashirama Senju','GOD',95],['Kenpachi Zaraki','GOD',92],['Kars','ELITE',88],['Vash the Stampede','ELITE',84],['Eren Founding','GOD',94],['Akainu','GOD',92],['Hisoka','ELITE',83],['Ban','ELITE',82],['Muzan','ELITE',89],['Pilaf','TRAP',13]],
+      CYAN: [['Rimuru True Dragon','GOD',99],['Esdeath','ELITE',87],['Franky','SOLID',76],['Bulma','SOLID',65],['Rei Ayanami','SOLID',74],['Nezuko','SOLID',79],['Law Trafalgar','ELITE',87],['Kuroko','SOLID',67],['Haku','SOLID',73],['Cabbage Merchant','TRAP',15]],
+      BRONZE: [['Gaara','ELITE',82],['Hashira Gyomei','ELITE',86],['Crocodile','ELITE',81],['Thorfinn','SOLID',79],['Spike Spiegel','SOLID',78],['Askeladd','SOLID',76],['Usopp','SOLID',68],['Ikkaku','SOLID',73],['Sado Chad','SOLID',72],['Danzo','TRAP',19]],
+      COSMIC: [['Zeno','GOD',100],['Anti-Spiral','GOD',100],['Truth (FMAB)','GOD',100],['Anos Voldigoad','GOD',99],['Featherine','GOD',100],['Simon Gurren','GOD',99],['Goku & Vegeta Fusion','GOD',98],['Madoka Kaname','GOD',98],['Whis','GOD',97],['Truck-kun','TRAP',25]]
+    }
+  },
+  starwars: {
+    name: 'Star Wars', icon: '🌌', sub: '140 Jedi, Sith & Droids',
+    pools: {
+      RED: [['Darth Vader','GOD',96],['Darth Maul','ELITE',85],['Kylo Ren','ELITE',83],['Count Dooku','ELITE',86],['Darth Malgus','ELITE',88],['Asajj Ventress','SOLID',78],['Royal Guard','SOLID',70],['Savage Opress','SOLID',77],['Grand Inquisitor','SOLID',76],['R5-D4','TRAP',14]],
+      BLUE: [['Luke Skywalker','GOD',97],['Obi-Wan Kenobi','GOD',92],['Anakin Skywalker','GOD',94],['Grand Admiral Thrawn','ELITE',87],['Rex','SOLID',77],['Jango Fett','SOLID',78],['Plo Koon','SOLID',79],['Aayla Secura','SOLID',75],['Cad Bane','ELITE',81],['Max Rebo','TRAP',16]],
+      GREEN: [['Master Yoda','GOD',97],['Qui-Gon Jinn','ELITE',85],['Boba Fett','ELITE',83],['Kit Fisto','SOLID',78],['Grievous','ELITE',84],['Ahsoka Tano','ELITE',88],['Hera Syndulla','SOLID',73],['Bossk','SOLID',74],['Luminara','SOLID',76],['Greedo','TRAP',15]],
+      GOLD: [['C-3PO','TRAP',20],['Supreme Leader Snoke','ELITE',82],['Mace Windu (Gold Hilt)','GOD',91],['Din Djarin Beskar','ELITE',84],['Bastila Shan','ELITE',85],['Satele Shan','ELITE',86],['Jedi Temple Guard','SOLID',77],['Dryden Vos','SOLID',71],['Maz Kanata','SOLID',69],['Salacious Crumb','TRAP',12]],
+      PURPLE: [['Darth Revan','GOD',98],['Mace Windu','GOD',92],['Mara Jade','ELITE',84],['Darth Traya','GOD',91],['Jaina Solo','ELITE',85],['Sabine Wren','SOLID',76],['Zorii Bliss','SOLID',68],['Zam Wesell','SOLID',70],['Nightsister Merrin','SOLID',79],['Jar Jar Binks','TRAP',10]],
+      BLACK: [['Emperor Palpatine','GOD',98],['Darth Nihilus','GOD',96],['Darth Bane','GOD',95],['Starkiller','GOD',94],['Moff Gideon','SOLID',77],['Dark Trooper','SOLID',78],['K-2SO','SOLID',74],['Shadow Trooper','SOLID',72],['Death Trooper','SOLID',76],['Gonk Droid','TRAP',13]],
+      WHITE: [['Leia Organa','ELITE',82],['Ahsoka the White','GOD',91],['Stormtrooper','TRAP',18],['Clone Commander Cody','SOLID',77],['Padmé Amidala','SOLID',74],['Mon Mothma','SOLID',68],['R2-D2','ELITE',81],['Baylan Skoll','ELITE',85],['Shin Hati','SOLID',78],['Wampa','SOLID',73]],
+      SILVER: [['Din Djarin','ELITE',84],['General Grievous','ELITE',84],['Captain Phasma','SOLID',73],['IG-11','SOLID',77],['IG-88','SOLID',76],['HK-47','ELITE',82],['Razor Crest','SOLID',75],['Super Battle Droid','SOLID',72],['L3-37','SOLID',67],['Mouse Droid','TRAP',11]],
+      ORANGE: [['Poe Dameron','SOLID',76],['BB-8','SOLID',72],['Ezra Bridger','SOLID',79],['Cal Kestis','ELITE',84],['Bo-Katan','ELITE',81],['Rebel Pilot','SOLID',66],['Aurra Sing','SOLID',74],['Sebulba','SOLID',65],['Boss Nass','TRAP',15],['Porg','TRAP',14]],
+      PINK: [['Obi-Wan (Holocron)','SOLID',75],['Padmé Royal','SOLID',74],['Sabine Armor','SOLID',76],['Ahsoka Pink','ELITE',83],['Sy Snootles','TRAP',13],['Oola','TRAP',14],['Twilek Jedi','SOLID',72],['Chiss Warrior','SOLID',75],['Zeltron Agent','SOLID',70],['Baby Yoda (Grogu)','ELITE',85]],
+      CRIMSON: [['Darth Maul Sith','ELITE',87],['Sith Trooper','SOLID',75],['Crimson Dawn Maul','ELITE',86],['Darth Talon','ELITE',82],['Mother Talzin','ELITE',86],['Praetorian Guard','SOLID',74],['Second Sister','SOLID',78],['Ninth Sister','SOLID',75],['Malak','GOD',91],['Red Guard Rookie','TRAP',16]],
+      CYAN: [['Force Ghost Anakin','GOD',95],['Force Ghost Yoda','GOD',95],['Force Ghost Obi-Wan','GOD',93],['Ben Solo','ELITE',85],['Rey Skywalker','ELITE',86],['Kanan Jarrus','ELITE',82],['Chirrut Îmwe','SOLID',76],['Baze Malbus','SOLID',75],['Hondo Ohnaka','SOLID',72],['Blue Milk Farmer','TRAP',15]],
+      BRONZE: [['Chewbacca','ELITE',81],['Han Solo','ELITE',82],['Lando Calrissian','SOLID',76],['Jabba the Hutt','SOLID',72],['Tusken Raider','SOLID',68],['Jawa','TRAP',17],['Ewok Warrior','TRAP',19],['Rancor','ELITE',81],['Krayt Dragon','ELITE',87],['Watto','TRAP',14]],
+      COSMIC: [['The Father (Mortis)','GOD',100],['The Son (Mortis)','GOD',98],['The Daughter (Mortis)','GOD',98],['Abeloth','GOD',99],['Bendu','GOD',95],['Grand Master Luke','GOD',98],['Darth Sidious Full','GOD',98],['Valkorion','GOD',97],['Whills Priestess','GOD',94],['Midichlorian','SOLID',75]]
+    }
+  }
+};
+
+UNIVERSES.chaos = {
+  name: 'Chaos Mix', icon: '🌀', sub: 'All 5 Universes Blended',
+  pools: {}
+};
+COLORS.forEach(c => {
+  let merged = [];
+  ['marvel', 'dc', 'pokemon', 'anime', 'starwars'].forEach(u => {
+    merged = merged.concat(UNIVERSES[u].pools[c.id]);
+  });
+  UNIVERSES.chaos.pools[c.id] = merged;
+});
+
+// ==================== 4. GAME STATE & PEERJS MULTIPLAYER ====================
+let selectedUniverse = 'marvel';
+let selectedMode = 'ai';
+let peer = null;
+let conn = null;
+let isHost = false;
+let roomCode = '';
+let unreadCount = 0;
+
+let game = {
+  active: false,
+  budget: 20,
+  maxSlots: 4,
+  p1: { name: 'Player 1', budget: 20, picks: [] },
+  p2: { name: 'Multiverse AI', budget: 20, picks: [] },
+  round: 1,
+  currentColor: null,
+  currentBid: 1,
+  highBidder: 1,
+  turn: 1,
+  usedNames: new Set()
+};
+
+const uniGrid = document.getElementById('universe-grid');
+Object.entries(UNIVERSES).forEach(([key, u]) => {
+  const btn = document.createElement('button');
+  btn.className = 'uni-btn' + (key === selectedUniverse ? ' active' : '');
+  btn.dataset.uni = key;
+  btn.innerHTML = `<span class="uni-icon">${u.icon}</span><div class="uni-name">${u.name}</div><div class="uni-sub">${u.sub}</div>`;
+  btn.onclick = () => {
+    selectedUniverse = key;
+    document.querySelectorAll('.uni-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  };
+  uniGrid.appendChild(btn);
+});
+
+function selectMode(mode) {
+  selectedMode = mode;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  const p2Field = document.getElementById('p2-field');
+  const joinField = document.getElementById('join-code-field');
+  const startBtn = document.getElementById('start-btn');
+  const p2Input = document.getElementById('p2-name');
+
+  p2Field.style.display = (mode === 'ai' || mode === 'local') ? 'block' : 'none';
+  joinField.style.display = (mode === 'join') ? 'block' : 'none';
+
+  if (mode === 'ai') {
+    p2Input.value = 'Multiverse AI';
+    startBtn.textContent = '🚀 Start Solo Draft';
+  } else if (mode === 'local') {
+    p2Input.value = 'Player 2';
+    startBtn.textContent = '📱 Start Pass & Play';
+  } else if (mode === 'host') {
+    startBtn.textContent = '🌐 Create 5-Digit Room';
+  } else if (mode === 'join') {
+    startBtn.textContent = '🔑 Join Room Now';
+  }
+}
+
+function handleStartAction() {
+  getAudioCtx();
+  const p1Name = document.getElementById('p1-name').value.trim() || 'Player 1';
+  const budget = parseInt(document.getElementById('budget-select').value, 10);
+  const maxSlots = parseInt(document.getElementById('slots-select').value, 10);
+
+  if (selectedMode === 'ai' || selectedMode === 'local') {
+    const p2Name = document.getElementById('p2-name').value.trim() || (selectedMode === 'ai' ? 'Multiverse AI' : 'Player 2');
+    startDraftMatch(p1Name, p2Name, budget, maxSlots);
+  } else if (selectedMode === 'host') {
+    createOnlineRoom(p1Name, budget, maxSlots);
+  } else if (selectedMode === 'join') {
+    const code = document.getElementById('join-code-input').value.trim();
+    if (!/^\d{5}$/.test(code)) {
+      alert('Please enter a valid 5-digit room code.');
+      return;
+    }
+    joinOnlineRoom(p1Name, code);
+  }
+}
+
+function createOnlineRoom(hostName, budget, maxSlots) {
+  isHost = true;
+  roomCode = String(Math.floor(10000 + Math.random() * 90000));
+  document.getElementById('display-room-code').textContent = roomCode;
+  document.getElementById('host-lobby').classList.remove('hidden');
+  document.getElementById('room-badge').textContent = `Room #${roomCode}`;
+  document.getElementById('status-text').textContent = 'Connecting to signaling server...';
+
+  if (peer) peer.destroy();
+  peer = new Peer('mcd-room-' + roomCode);
+
+  peer.on('open', () => {
+    document.getElementById('status-text').textContent = `Room #${roomCode} live!`;
+    addChatMessage('System', `Room #${roomCode} created. Enable Mic anytime to voice chat!`, false, true);
+  });
+
+  peer.on('connection', (connection) => {
+    conn = connection;
+    setupPeerEvents();
+    conn.on('open', () => {
+      document.getElementById('lobby-wait-msg').textContent = 'Friend connected! Launching draft...';
+      connectVoiceCallIfReady();
+      playDingSound();
+    });
+  });
+
+  peer.on('call', (incomingCall) => {
+    if (localAudioStream) {
+      incomingCall.answer(localAudioStream);
+    } else {
+      incomingCall.answer();
+    }
+    attachMediaCallHandlers(incomingCall);
+  });
+
+  peer.on('error', (err) => {
+    document.getElementById('status-text').textContent = 'Network notice: ' + err.type;
+  });
+}
+
+function joinOnlineRoom(guestName, code) {
+  isHost = false;
+  roomCode = code;
+  document.getElementById('room-badge').textContent = `Room #${roomCode}`;
+  document.getElementById('status-text').textContent = `Joining Room #${code}...`;
+
+  if (peer) peer.destroy();
+  peer = new Peer();
+
+  peer.on('open', () => {
+    conn = peer.connect('mcd-room-' + code);
+    setupPeerEvents();
+    conn.on('open', () => {
+      conn.send({ type: 'hello', name: guestName });
+      addChatMessage('System', `Connected to Room #${code}!`, false, true);
+      connectVoiceCallIfReady();
+      playDingSound();
+    });
+  });
+
+  peer.on('call', (incomingCall) => {
+    if (localAudioStream) {
+      incomingCall.answer(localAudioStream);
+    } else {
+      incomingCall.answer();
+    }
+    attachMediaCallHandlers(incomingCall);
+  });
+
+  peer.on('error', () => {
+    document.getElementById('status-text').textContent = 'Could not find room #' + code;
+  });
+}
+
+function setupPeerEvents() {
+  conn.on('data', (data) => {
+    if (data.type === 'hello' && isHost) {
+      const p1Name = document.getElementById('p1-name').value.trim() || 'Host';
+      const budget = parseInt(document.getElementById('budget-select').value, 10);
+      const maxSlots = parseInt(document.getElementById('slots-select').value, 10);
+      addChatMessage('System', `${data.name} joined the room!`, false, true);
+      showToastNotification('Room Alert', `${data.name} joined Room #${roomCode}!`);
+      playDingSound();
+      startDraftMatch(p1Name, data.name, budget, maxSlots);
+      syncStateToGuest();
+    } else if (data.type === 'sync') {
+      applySyncedState(data.state);
+    } else if (data.type === 'action' && isHost) {
+      if (data.action === 'bid') placeBid(data.amount, true);
+      if (data.action === 'pass') passBid(true);
+    } else if (data.type === 'chat') {
+      receiveRemoteChat(data.sender, data.text);
+    }
+  });
+}
+
+function syncStateToGuest() {
+  if (!isHost || !conn || !conn.open) return;
+  conn.send({
+    type: 'sync',
+    state: {
+      universe: selectedUniverse,
+      budget: game.budget,
+      maxSlots: game.maxSlots,
+      p1: game.p1,
+      p2: game.p2,
+      round: game.round,
+      currentColor: game.currentColor,
+      currentBid: game.currentBid,
+      highBidder: game.highBidder,
+      turn: game.turn,
+      active: game.active
+    }
+  });
+}
+
+function applySyncedState(st) {
+  selectedUniverse = st.universe;
+  game.budget = st.budget;
+  game.maxSlots = st.maxSlots;
+  game.p1 = st.p1;
+  game.p2 = st.p2;
+  game.round = st.round;
+  game.currentColor = st.currentColor;
+  game.currentBid = st.currentBid;
+  game.highBidder = st.highBidder;
+  game.turn = st.turn;
+  game.active = st.active;
+
+  document.getElementById('setup-panel').classList.add('hidden');
+  if (game.active) {
+    document.getElementById('reveal-panel').classList.add('hidden');
+    document.getElementById('auction-panel').classList.remove('hidden');
+    renderAuctionUI();
+  } else {
+    showFinalReveal();
+  }
+}
+
+function copyRoomCode() {
+  navigator.clipboard?.writeText(roomCode);
+  showToastNotification('Copied!', `Room code ${roomCode} copied to clipboard.`);
+}
+
+// ==================== 5. AUCTION & DRAFT ENGINE ====================
+function startDraftMatch(p1Name, p2Name, budget, maxSlots) {
+  game.active = true;
+  game.budget = budget;
+  game.maxSlots = maxSlots;
+  game.p1 = { name: p1Name, budget: budget, picks: [] };
+  game.p2 = { name: p2Name, budget: budget, picks: [] };
+  game.round = 1;
+
+  document.getElementById('setup-panel').classList.add('hidden');
+  document.getElementById('reveal-panel').classList.add('hidden');
+  document.getElementById('auction-panel').classList.remove('hidden');
+
+  if (selectedMode === 'ai') {
+    addChatMessage(p2Name, `Ready to outbid you in ${UNIVERSES[selectedUniverse].name}! Let's go!`, false);
+    playDingSound();
+  }
+
+  setupNextRound();
+}
+
+function drawCharacterFromColor(colorObj) {
+  const pool = UNIVERSES[selectedUniverse].pools[colorObj.id];
+  let available = pool.filter(item => !game.usedNames.has(item[0]));
+  if (available.length === 0) {
+    pool.forEach(item => game.usedNames.delete(item[0]));
+    available = pool;
+  }
+  const pick = available[Math.floor(Math.random() * available.length)];
+  game.usedNames.add(pick[0]);
+  return { color: colorObj, name: pick[0], tier: pick[1], score: pick[2], price: 0 };
+}
+
+function setupNextRound() {
+  if (game.p1.picks.length >= game.maxSlots && game.p2.picks.length >= game.maxSlots) {
+    game.active = false;
+    syncStateToGuest();
+    showFinalReveal();
+    return;
+  }
+
+  const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+  game.currentColor = randomColor;
+
+  if (game.p1.picks.length >= game.maxSlots) {
+    awardColorToPlayer(2, Math.min(1, game.p2.budget), true);
+    return;
+  }
+  if (game.p2.picks.length >= game.maxSlots) {
+    awardColorToPlayer(1, Math.min(1, game.p1.budget), true);
+    return;
+  }
+
+  const opener = (game.round % 2 === 1) ? 1 : 2;
+  const openerObj = opener === 1 ? game.p1 : game.p2;
+  const startBid = openerObj.budget > 0 ? 1 : 0;
+
+  game.currentBid = startBid;
+  game.highBidder = opener;
+  game.turn = opener === 1 ? 2 : 1;
+
+  renderAuctionUI();
+  syncStateToGuest();
+
+  if (selectedMode === 'ai' && game.turn === 2) {
+    setTimeout(aiTakeTurn, 750);
+  }
+}
+
+function renderAuctionUI() {
+  document.getElementById('auction-round-title').textContent =
+    `ROUND ${game.round} • ${UNIVERSES[selectedUniverse].icon} ${UNIVERSES[selectedUniverse].name.toUpperCase()} DRAFT`;
+
+  document.getElementById('hud-p1-name').textContent = game.p1.name;
+  document.getElementById('hud-p1-budget').textContent = `$${game.p1.budget}`;
+  document.getElementById('hud-p2-name').textContent = game.p2.name;
+  document.getElementById('hud-p2-budget').textContent = `$${game.p2.budget}`;
+
+  renderSlots('hud-p1-slots', game.p1.picks);
+  renderSlots('hud-p2-slots', game.p2.picks);
+
+  document.getElementById('p1-hud').classList.toggle('active-turn', game.turn === 1);
+  document.getElementById('p2-hud').classList.toggle('active-turn', game.turn === 2);
+
+  const orb = document.getElementById('orb-display');
+  orb.textContent = game.currentColor.emoji;
+  orb.style.background = game.currentColor.bg;
+  document.getElementById('color-title').textContent = `${game.currentColor.name.toUpperCase()} POOL`;
+
+  const leaderName = game.highBidder === 1 ? game.p1.name : game.p2.name;
+  document.getElementById('current-bid-text').textContent = `Current Bid: $${game.currentBid} (${leaderName})`;
+
+  const turnPlayer = game.turn === 1 ? game.p1 : game.p2;
+  const canAct = (selectedMode === 'local') ||
+                 (selectedMode === 'ai' && game.turn === 1) ||
+                 (selectedMode === 'host' && game.turn === 1) ||
+                 (selectedMode === 'join' && game.turn === 2);
+
+  document.getElementById('turn-indicator').textContent = canAct
+    ? `👉 ${turnPlayer.name}'s Turn: Raise or Pass!`
+    : `⏳ Waiting for ${turnPlayer.name}...`;
+
+  const btns = document.querySelectorAll('#bid-buttons button');
+  btns[0].disabled = !canAct || (game.currentBid + 1 > turnPlayer.budget);
+  btns[1].disabled = !canAct || (game.currentBid + 2 > turnPlayer.budget);
+  btns[2].disabled = !canAct || (game.currentBid + 3 > turnPlayer.budget);
+  btns[3].disabled = !canAct;
+}
+
+function renderSlots(elId, picks) {
+  const el = document.getElementById(elId);
+  el.innerHTML = '';
+  for (let i = 0; i < game.maxSlots; i++) {
+    const pill = document.createElement('span');
+    pill.className = 'slot-pill';
+    if (picks[i]) {
+      pill.textContent = `${picks[i].color.emoji} ${picks[i].color.name} ($${picks[i].price})`;
+      pill.style.color = '#fff';
+      pill.style.borderColor = '#fbbf24';
+    } else {
+      pill.textContent = `${i + 1}. [Empty]`;
+    }
+    el.appendChild(pill);
+  }
+}
+
+function placeBid(increment, fromRemote = false) {
+  if (selectedMode === 'join' && !fromRemote) {
+    conn.send({ type: 'action', action: 'bid', amount: increment });
+    return;
+  }
+  const bidder = game.turn === 1 ? game.p1 : game.p2;
+  const nextBid = game.currentBid + increment;
+  if (nextBid > bidder.budget) return;
+
+  game.currentBid = nextBid;
+  game.highBidder = game.turn;
+  game.turn = game.turn === 1 ? 2 : 1;
+
+  if (selectedMode === 'ai' && game.highBidder === 1 && nextBid >= 7 && Math.random() < 0.45) {
+    aiSay(`$${nextBid} for ${game.currentColor.name}?! Bold move...`);
+  }
+
+  renderAuctionUI();
+  syncStateToGuest();
+
+  if (selectedMode === 'ai' && game.turn === 2) {
+    setTimeout(aiTakeTurn, 750);
+  }
+}
+
+function passBid(fromRemote = false) {
+  if (selectedMode === 'join' && !fromRemote) {
+    conn.send({ type: 'action', action: 'pass' });
+    return;
+  }
+  awardColorToPlayer(game.highBidder, game.currentBid, false);
+}
+
+function awardColorToPlayer(winnerNum, price, isAuto) {
+  const winner = winnerNum === 1 ? game.p1 : game.p2;
+  const charCard = drawCharacterFromColor(game.currentColor);
+  charCard.price = price;
+  winner.budget = Math.max(0, winner.budget - price);
+  winner.picks.push(charCard);
+
+  addChatMessage('System', `${winner.name} locked ${game.currentColor.emoji} ${game.currentColor.name} for $${price}${isAuto ? ' (Final Slot Draw)' : ''}!`, false, true);
+
+  if (selectedMode === 'ai' && winnerNum === 1 && price <= 2 && Math.random() < 0.5) {
+    aiSay(`You stole ${game.currentColor.name} for just $${price}? Watch it be a trap!`);
+  }
+
+  game.round++;
+  setupNextRound();
+}
+
+function aiTakeTurn() {
+  if (!game.active || game.turn !== 2) return;
+  const remainingSlots = game.maxSlots - game.p2.picks.length;
+  const maxComfort = Math.max(1, Math.floor(game.p2.budget / remainingSlots) + 2);
+
+  if (game.currentBid < maxComfort && game.currentBid + 1 <= game.p2.budget && Math.random() < 0.72) {
+    const step = (game.currentBid + 2 <= maxComfort && Math.random() < 0.3) ? 2 : 1;
+    placeBid(step);
+  } else {
+    passBid();
+  }
+}
+
+// ==================== 6. 3D CARD REVEAL & SCORING ====================
+function showFinalReveal() {
+  document.getElementById('auction-panel').classList.add('hidden');
+  document.getElementById('reveal-panel').classList.remove('hidden');
+  document.getElementById('winner-banner').classList.add('hidden');
+
+  document.getElementById('rev-p1-title').textContent = `${game.p1.name}'s Squad ($${game.budget - game.p1.budget} Spent)`;
+  document.getElementById('rev-p2-title').textContent = `${game.p2.name}'s Squad ($${game.budget - game.p2.budget} Spent)`;
+
+  renderRevealGrid('rev-p1-grid', game.p1.picks);
+  renderRevealGrid('rev-p2-grid', game.p2.picks);
+}
+
+function renderRevealGrid(elId, picks) {
+  const grid = document.getElementById(elId);
+  grid.innerHTML = '';
+  picks.forEach((item) => {
+    const card = document.createElement('div');
+    card.className = 'flip-card';
+    card.innerHTML = `
+      <div class="flip-inner">
+        <div class="flip-front" style="background:${item.color.bg}">
+          <div style="font-size:2.4rem;">${item.color.emoji}</div>
+          <div style="font-weight:900;font-size:1.05rem;margin-top:6px;">${item.color.name.toUpperCase()}</div>
+          <div style="font-size:0.78rem;opacity:0.9;">Bought for $${item.price}</div>
+          <div style="font-size:0.7rem;margin-top:8px;background:rgba(0,0,0,0.45);padding:3px 9px;border-radius:999px;">Tap to Reveal</div>
+        </div>
+        <div class="flip-back">
+          <span class="tier-badge tier-${item.tier}">${item.tier} • ${item.score} PWR</span>
+          <div style="font-weight:900;font-size:1.08rem;color:#fff;">${item.name}</div>
+          <div style="font-size:0.78rem;color:var(--gold);margin-top:6px;">${item.color.emoji} ${item.color.name} ($${item.price})</div>
+        </div>
+      </div>
+    `;
+    card.onclick = () => {
+      if (!card.classList.contains('flipped')) {
+        card.classList.add('flipped');
+        playDingSound();
+        checkAllRevealed();
+      }
+    };
+    grid.appendChild(card);
+  });
+}
+
+function flipAllCards() {
+  document.querySelectorAll('.flip-card').forEach(c => c.classList.add('flipped'));
+  playDingSound();
+  checkAllRevealed();
+}
+
+function checkAllRevealed() {
+  const total = document.querySelectorAll('.flip-card').length;
+  const flipped = document.querySelectorAll('.flip-card.flipped').length;
+  if (flipped < total) return;
+
+  const p1Score = game.p1.picks.reduce((s, x) => s + x.score, 0);
+  const p2Score = game.p2.picks.reduce((s, x) => s + x.score, 0);
+  const banner = document.getElementById('winner-banner');
+  banner.classList.remove('hidden');
+
+  let resultText = '';
+  if (p1Score > p2Score) {
+    resultText = `🏆 ${game.p1.name.toUpperCase()} WINS! (${p1Score} PWR vs ${p2Score} PWR)`;
+  } else if (p2Score > p1Score) {
+    resultText = `🏆 ${game.p2.name.toUpperCase()} WINS! (${p2Score} PWR vs ${p1Score} PWR)`;
+  } else {
+    resultText = `🤝 IT'S AN EPIC TIE! (${p1Score} PWR each)`;
+  }
+  banner.innerHTML = `<div style="font-size:1.3rem;font-weight:900;color:var(--gold);">${resultText}</div>`;
+
+  if (selectedMode === 'ai') {
+    aiSay(p2Score > p1Score ? 'Haha! My squad crushed it! Rematch?' : 'Okay you got lucky on that reveal—run it back!');
+  }
+}
+
+function rematchDraft() {
+  startDraftMatch(game.p1.name, game.p2.name, game.budget, game.maxSlots);
+  syncStateToGuest();
+}
+
+function resetToMenu() {
+  document.getElementById('auction-panel').classList.add('hidden');
+  document.getElementById('reveal-panel').classList.add('hidden');
+  document.getElementById('setup-panel').classList.remove('hidden');
+}
+
+// ==================== 7. LIVE CHAT + DING TOAST NOTIFICATIONS ====================
+function getMyChatName() {
+  return document.getElementById('p1-name').value.trim() || 'Player';
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  const me = getMyChatName();
+  addChatMessage(me, text, true);
+
+  if (conn && conn.open) {
+    conn.send({ type: 'chat', sender: me, text });
+  } else if (selectedMode === 'ai') {
+    setTimeout(() => generateAiChatReply(text), 650);
+  }
+}
+
+function sendQuickBanter(phrase) {
+  const me = getMyChatName();
+  addChatMessage(me, phrase, true);
+  if (conn && conn.open) {
+    conn.send({ type: 'chat', sender: me, text: phrase });
+  } else if (selectedMode === 'ai') {
+    setTimeout(() => generateAiChatReply(phrase), 600);
+  }
+}
+
+function receiveRemoteChat(sender, text) {
+  addChatMessage(sender, text, false);
+  playDingSound();
+  showToastNotification(`💬 ${sender}`, text);
+  incrementUnread();
+}
+
+function aiSay(text) {
+  const aiName = game.p2.name || 'Multiverse AI';
+  addChatMessage(aiName, text, false);
+  playDingSound();
+  showToastNotification(`🤖 ${aiName}`, text);
+  incrementUnread();
+}
+
+function generateAiChatReply(userText) {
+  const lower = userText.toLowerCase();
+  let reply = 'Save your budget—the best color has not dropped yet!';
+  if (lower.includes('trap')) reply = 'No traps in my squad, only Cosmic Gods!';
+  else if (lower.includes('steal')) reply = 'Enjoy the bargain while it lasts!';
+  else if (lower.includes('gg')) reply = 'GG! Best draft battle yet!';
+  else if (lower.includes('bid') || lower.includes('war')) reply = 'Bring it on—I am not backing down!';
+  aiSay(reply);
+}
+
+function addChatMessage(sender, text, isMe, isSys = false) {
+  const log = document.getElementById('chat-log');
+  const div = document.createElement('div');
+  div.className = 'chat-msg' + (isSys ? ' sys' : (isMe ? ' me' : ''));
+  if (isSys) {
+    div.textContent = text;
+  } else {
+    div.innerHTML = `<div class="chat-meta">${escapeHtml(sender)}</div><div>${escapeHtml(text)}</div>`;
+  }
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function showToastNotification(title, message) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'chat-toast';
+  toast.innerHTML = `<strong>🔔 ${escapeHtml(title)}</strong><div>${escapeHtml(message)}</div>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => toast.remove(), 320);
+  }, 3600);
+}
+
+function incrementUnread() {
+  const badge = document.getElementById('unread-badge');
+  unreadCount++;
+  badge.textContent = `${unreadCount} NEW`;
+  badge.classList.add('show');
+}
+
+document.getElementById('chat-input').addEventListener('focus', () => {
+  unreadCount = 0;
+  document.getElementById('unread-badge').classList.remove('show');
+});
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+}
+
+// ==================== 8. COLOR CODEX MODAL ====================
+function openCodex() {
+  const uni = UNIVERSES[selectedUniverse];
+  document.getElementById('codex-title').textContent = `${uni.icon} ${uni.name.toUpperCase()} — 14 MYSTERY COLOR POOLS`;
+  const grid = document.getElementById('codex-grid');
+  grid.innerHTML = '';
+  COLORS.forEach(c => {
+    const list = uni.pools[c.id].slice(0, 10).map(x => `${x[0]} (${x[1]})`).join(', ');
+    const card = document.createElement('div');
+    card.className = 'codex-item';
+    card.innerHTML = `<div style="font-weight:900;margin-bottom:4px;">${c.emoji} ${c.name.toUpperCase()}</div><div style="color:var(--muted);line-height:1.35;">${list}</div>`;
+    grid.appendChild(card);
+  });
+  document.getElementById('codex-modal').classList.remove('hidden');
+}
+
+function closeCodex() {
+  document.getElementById('codex-modal').classList.add('hidden');
+}
+
+addChatMessage('System', 'Welcome to Multiverse Colors Draft! Enable Mic for live voice or chat with crisp ding alerts.', false, true);
+</script>
+</body>
+</html>
